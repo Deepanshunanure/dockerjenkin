@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Deepanshunanure/dockerjenkin.git' // Replace with your repo
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                sh '''
+                #!/bin/bash
+                python3 -m venv venv
+                source venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh '''
+                #!/bin/bash
+                source venv/bin/activate
+                python src/main.py
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                #!/bin/bash
+                source venv/bin/activate
+                pytest src/test_main.py
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs() // Clean workspace after pipeline completion
+        }
+    }
+}
